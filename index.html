@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>ZEM Pro - Eğitim Portalı</title>
+    <style>
+        :root { --primary: #800000; }
+        body { 
+            font-family: sans-serif; 
+            margin: 0; 
+            background: #f4f4f4 url('plan.png') no-repeat center center fixed; 
+            background-size: cover;
+        }
+        
+        /* SIDEBAR - ESKİ USUL SADE */
+        .sidebar {
+            width: 250px; height: 100vh; position: fixed; left: -250px; top: 0;
+            background: white; border-right: 2px solid var(--primary);
+            transition: 0.3s; z-index: 1000; padding: 20px; box-sizing: border-box;
+        }
+        .sidebar.active { left: 0; }
+        
+        /* LOGO VE PROFİL */
+        .zem-logo {
+            width: 60px; height: 60px; background: var(--primary); color: white;
+            font-size: 40px; font-weight: bold; display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 10px; border-radius: 10px;
+        }
+
+        /* KARTLAR VE BUTONLAR */
+        .card { 
+            background: white; padding: 20px; margin-bottom: 20px; 
+            border-radius: 5px; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn { padding: 8px 15px; cursor: pointer; border: 1px solid var(--primary); border-radius: 4px; font-weight: bold; }
+        .btn-bordo { background: var(--primary); color: white; }
+        .btn-outline { background: white; color: var(--primary); }
+        
+        .container { width: 90%; max-width: 1000px; margin: 20px auto; transition: 0.3s; }
+        .hidden { display: none !important; }
+        
+        /* TAKVİM VE BAR */
+        .takvim { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; font-size: 12px; text-align: center; }
+        .bugun { background: var(--primary); color: white; border-radius: 3px; }
+        .bar-bg { background: #ddd; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        .bar-fill { background: var(--primary); height: 100%; width: 0%; transition: 0.5s; }
+        
+        .badge { padding: 3px 6px; font-size: 10px; color: white; border-radius: 3px; }
+        .yorum { background: #eee; padding: 8px; margin-top: 5px; font-size: 12px; border-left: 3px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+<div id="sidebar" class="sidebar">
+    <div class="zem-logo">Z</div>
+    <div style="text-align:center; margin-bottom:20px;">
+        <b id="side-name">Kullanıcı</b><br>
+        <small id="side-role"></small>
+    </div>
+    
+    <button class="btn btn-outline" style="width:100%; margin-bottom:5px;" onclick="sayfaDegistir('liste-ekrani')">🏠 Ana Sayfa</button>
+    <button class="btn btn-outline" style="width:100%; margin-bottom:5px;" onclick="sayfaDegistir('notlar-ekrani'); notlariGoster();">📚 Ders Notlarım</button>
+    <button class="btn btn-outline" style="width:100%; margin-bottom:5px;" onclick="sayfaDegistir('ayarlar-ekrani')">⚙️ Ayarlar</button>
+    <button class="btn btn-bordo" style="width:100%; margin-top:20px;" onclick="location.reload()">Çıkış Yap</button>
+</div>
+
+<div class="container" id="main-cont">
+    <button class="btn btn-bordo hidden" id="menu-btn" onclick="toggleSidebar()">☰ Menü</button>
+
+    <div id="giris-ekrani" class="card" style="max-width:350px; margin:100px auto; text-align:center;">
+        <h2 style="color:var(--primary)">ZEM Pro Giriş</h2>
+        <input type="text" id="userName" placeholder="Ad Soyad" style="width:80%; padding:10px; margin-bottom:10px;">
+        <br>
+        <button class="btn btn-bordo" onclick="girisYap('ogretmen')">Öğretmen</button>
+        <button class="btn btn-outline" onclick="girisYap('ogrenci')">Öğrenci</button>
+    </div>
+
+    <div id="ana-panel" class="hidden">
+        
+        <div id="liste-ekrani">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Sınıflarım</h2>
+                <button class="btn btn-bordo hidden" id="addBtn" onclick="sinifEkle()">+ Sınıf Ekle</button>
+            </div>
+            <div id="sinif-liste" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:15px;"></div>
+        </div>
+
+        <div id="detay-ekrani" class="hidden">
+            <button class="btn btn-outline" onclick="sayfaDegistir('liste-ekrani')">← Geri</button>
+            <div style="display:flex; gap:20px; margin-top:15px;">
+                <div style="width:30%;">
+                    <div class="card">
+                        <h4 id="takvim-ay"></h4>
+                        <div id="takvim-gunler" class="takvim"></div>
+                    </div>
+                    <div class="card">
+                        <b>İlerleme %<span id="yuzde-metin">0</span></b>
+                        <div class="bar-bg"><div id="progress-bar" class="bar-fill"></div></div>
+                        <small>Etkinlik: <b id="odev-sayac">0</b></small>
+                    </div>
+                </div>
+                <div style="flex:1;">
+                    <div class="card" style="background:var(--primary); color:white;">
+                        <h2 id="aktif-baslik" style="margin:0;"></h2>
+                        <small id="aktif-kod"></small>
+                    </div>
+                    <div class="card">
+                        <input type="text" id="mesajInp" placeholder="Duyuru veya link..." style="width:70%; padding:8px;">
+                        <button class="btn btn-bordo" onclick="paylas()">Paylaş</button>
+                    </div>
+                    <div id="akis"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notlar-ekrani" class="hidden">
+            <div class="card">
+                <h2>📚 Ders Notlarım</h2>
+                <textarea id="notInput" style="width:100%; height:100px;"></textarea><br>
+                <button class="btn btn-bordo" onclick="notKaydet()">Kaydet</button>
+                <div id="kayitli-notlar"></div>
+            </div>
+        </div>
+
+        <div id="ayarlar-ekrani" class="hidden">
+            <div class="card">
+                <h2>⚙️ Ayarlar</h2>
+                <p>İsim Değiştir:</p>
+                <input type="text" id="newName" style="padding:5px;">
+                <button class="btn btn-bordo" onclick="isimGuncelle()">Güncelle</button>
+                <p>Tema:</p>
+                <button class="btn btn-bordo" onclick="temaDeğiş('#800000')">Bordo</button>
+                <button class="btn btn-outline" style="background:black; color:white;" onclick="temaDeğiş('#000')">Siyah</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let user = { name: "", role: "" };
+    let classes = JSON.parse(localStorage.getItem('zem_classes')) || [];
+    let aktifIdx = null;
+
+    function girisYap(r) {
+        let n = document.getElementById('userName').value;
+        if(!n) return alert("İsim yaz kanka!");
+        user = { name: n, role: r };
+        document.getElementById('giris-ekrani').classList.add('hidden');
+        document.getElementById('ana-panel').classList.remove('hidden');
+        document.getElementById('menu-btn').classList.remove('hidden');
+        document.getElementById('side-name').innerText = n;
+        document.getElementById('side-role').innerText = r === 'ogretmen' ? 'Öğretmen' : 'Öğrenci';
+        if(r === 'ogretmen') document.getElementById('addBtn').classList.remove('hidden');
+        renderClasses();
+    }
+
+    function toggleSidebar() { 
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('main-cont').style.marginLeft = document.getElementById('sidebar').classList.contains('active') ? "260px" : "auto";
+    }
+
+    function sayfaDegistir(id) {
+        ['liste-ekrani', 'detay-ekrani', 'notlar-ekrani', 'ayarlar-ekrani'].forEach(e => document.getElementById(e).classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        if(document.getElementById('sidebar').classList.contains('active')) toggleSidebar();
+    }
+
+    function sinifEkle() {
+        let n = prompt("Sınıf Adı:");
+        if(n) {
+            classes.push({ name: n, code: Math.random().toString(36).substring(7).toUpperCase(), posts: [] });
+            save(); renderClasses();
+        }
+    }
+
+    function sinifSil(i, e) {
+        e.stopPropagation();
+        if(confirm("Sınıfı sileyim mi?")) {
+            classes.splice(i, 1);
+            save(); renderClasses();
+        }
+    }
+
+    function renderClasses() {
+        const div = document.getElementById('sinif-liste');
+        div.innerHTML = "";
+        classes.forEach((c, i) => {
+            div.innerHTML += `
+                <div class="card" style="cursor:pointer; position:relative;" onclick="openClass(${i})">
+                    <button onclick="sinifSil(${i}, event)" style="position:absolute; right:5px; top:5px; border:none; background:none; cursor:pointer;">✕</button>
+                    <h3>${c.name}</h3>
+                    <small>Kod: ${c.code}</small>
+                </div>`;
+        });
+    }
+
+    function openClass(i) {
+        aktifIdx = i;
+        sayfaDegistir('detay-ekrani');
+        document.getElementById('aktif-baslik').innerText = classes[i].name;
+        document.getElementById('aktif-kod').innerText = "Kod: " + classes[i].code;
+        takvim(); renderPosts();
+    }
+
+    function paylas() {
+        let txt = document.getElementById('mesajInp').value;
+        if(!txt) return;
+        classes[aktifIdx].posts.push({ u: user.name, t: txt, teslim: false, puan: null, yorumlar: [] });
+        save(); document.getElementById('mesajInp').value = ""; renderPosts();
+    }
+
+    function renderPosts() {
+        const div = document.getElementById('akis');
+        div.innerHTML = "";
+        const posts = classes[aktifIdx].posts || [];
+        posts.slice().reverse().forEach((p, revI) => {
+            let i = (posts.length - 1) - revI;
+            let yorumlar = (p.yorumlar || []).map(y => `<div class="yorum"><b>${y.u}:</b> ${y.t}</div>`).join('');
+            div.innerHTML += `
+                <div class="card">
+                    <b>${p.u}</b> ${p.teslim ? '<span class="badge" style="background:green">Teslim Edildi</span>' : '<span class="badge" style="background:red">Bekliyor</span>'}
+                    <p>${p.t}</p>
+                    <button class="btn btn-outline" style="font-size:10px" onclick="yorumYap(${i})">Yorum</button>
+                    ${user.role === 'ogrenci' && !p.teslim ? `<button class="btn btn-bordo" style="font-size:10px" onclick="teslim(${i})">Teslim Et</button>` : ''}
+                    ${user.role === 'ogretmen' ? `<button class="btn btn-outline" style="font-size:10px" onclick="puanVer(${i})">Puan Ver</button>` : ''}
+                    ${p.puan ? `<b> ⭐ ${p.puan}</b>` : ''}
+                    ${yorumlar}
+                </div>`;
+        });
+        basariGuncelle();
+    }
+
+    function teslim(i) { classes[aktifIdx].posts[i].teslim = true; save(); renderPosts(); }
+    function puanVer(i) { let p = prompt("Puan:"); if(p) { classes[aktifIdx].posts[i].puan = p; save(); renderPosts(); } }
+    function yorumYap(i) { let y = prompt("Yorum:"); if(y) { classes[aktifIdx].posts[i].yorumlar.push({u:user.name, t:y}); save(); renderPosts(); } }
+    
+    function notKaydet() {
+        let n = document.getElementById('notInput').value;
+        let notlar = JSON.parse(localStorage.getItem('zem_notlar')) || [];
+        notlar.push(n); localStorage.setItem('zem_notlar', JSON.stringify(notlar));
+        document.getElementById('notInput').value = ""; notlariGoster();
+    }
+    function notlariGoster() {
+        let notlar = JSON.parse(localStorage.getItem('zem_notlar')) || [];
+        document.getElementById('kayitli-notlar').innerHTML = notlar.map(n => `<div class="yorum">${n}</div>`).join('');
+    }
+    function isimGuncelle() { user.name = document.getElementById('newName').value; document.getElementById('side-name').innerText = user.name; }
+    function temaDeğiş(c) { document.documentElement.style.setProperty('--primary', c); }
+    function save() { localStorage.setItem('zem_classes', JSON.stringify(classes)); }
+    
+    function takvim() {
+        const d = new Date();
+        document.getElementById('takvim-ay').innerText = d.toLocaleString('tr', {month:'long'});
+        let g = "";
+        for(let i=1; i<=30; i++) g += `<div class="${i===d.getDate()?'bugun':''}">${i}</div>`;
+        document.getElementById('takvim-gunler').innerHTML = g;
+    }
+
+    function basariGuncelle() {
+        let c = classes[aktifIdx].posts.length;
+        let y = Math.min(c * 10, 100);
+        document.getElementById('progress-bar').style.width = y + "%";
+        document.getElementById('yuzde-metin').innerText = y;
+        document.getElementById('odev-sayac').innerText = c;
+    }
+</script>
+</body>
+</html>
