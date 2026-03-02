@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>ZBN - Modern Eğitim Portalı</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        /* VARSAYILAN (AYDINLIK) TEMA DEĞİŞKENLERİ */
+        :root { 
+            --primary: #FF7A00; 
+            --secondary: #00C853; 
+            --bg-color: #F8F9FA; 
+            --text-dark: #2D3436;
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --input-bg: rgba(255,255,255,0.8);
+            --panel-bg: white;
+            --pattern-color: rgba(0, 0, 0, 0.05); /* Aydınlık mod nokta rengi */
+        }
+
+        /* KARANLIK TEMA DEĞİŞKENLERİ */
+        body.dark-mode {
+            --bg-color: #121212; 
+            --text-dark: #E0E0E0;
+            --glass-bg: rgba(30, 30, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(40, 40, 40, 0.8);
+            --panel-bg: #1e1e1e;
+            --pattern-color: rgba(255, 255, 255, 0.03); /* Karanlık mod nokta rengi */
+        }
+
+        body { font-family: 'Poppins', sans-serif; margin: 0; background-color: var(--bg-color); color: var(--text-dark); overflow-x: hidden; min-height: 100vh; transition: background-color 0.5s ease, color 0.5s ease; }
+
+        /* YENİ: MODERN NOKTA MATRİSİ ARKA PLAN */
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: radial-gradient(var(--pattern-color) 2px, transparent 2px);
+            background-size: 30px 30px; /* Noktaların sıklığı */
+            z-index: -1;
+            transition: background-image 0.5s ease;
+        }
+
+        /* HAREKETLİ KÜRELER (Bir tane daha eklendi ve katman ayarlandı) */
+        .bg-shape { position: fixed; border-radius: 50%; filter: blur(90px); z-index: -2; animation: float 12s infinite alternate ease-in-out; transition: opacity 0.5s; }
+        .shape1 { width: 500px; height: 500px; background: rgba(255, 122, 0, 0.3); top: -150px; left: -100px; }
+        .shape2 { width: 400px; height: 400px; background: rgba(0, 200, 83, 0.25); bottom: -100px; right: -50px; animation-delay: -5s; }
+        .shape3 { width: 350px; height: 350px; background: rgba(255, 122, 0, 0.2); top: 40%; left: 30%; animation-duration: 15s; }
+        .shape4 { width: 450px; height: 450px; background: rgba(66, 133, 244, 0.2); bottom: 10%; left: -100px; animation-duration: 18s; animation-direction: reverse; }
+        
+        body.dark-mode .bg-shape { opacity: 0.5; }
+
+        @keyframes float { 0% { transform: translateY(0px) translateX(0px) scale(1); } 100% { transform: translateY(60px) translateX(40px) scale(1.1); } }
+
+        /* ARAYÜZ ELEMANLARI */
+        .sidebar { width: 260px; height: 100vh; position: fixed; left: -280px; top: 0; background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-right: 1px solid var(--glass-border); transition: 0.4s; z-index: 1000; padding: 30px 20px; box-sizing: border-box; }
+        .sidebar.active { left: 0; }
+        
+        .zbn-logo { width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary), #FF9E44); color: white; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border-radius: 20px; box-shadow: 0 10px 20px rgba(255, 122, 0, 0.3); letter-spacing: 1px; }
+
+        .card { background: var(--glass-bg); padding: 25px; margin-bottom: 25px; border-radius: 16px; border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform 0.3s, background 0.5s, border 0.5s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+
+        .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; transition: 0.3s; font-size: 14px; font-family: 'Poppins', sans-serif;}
+        .btn:active { transform: scale(0.95); }
+        .btn-bordo { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255, 122, 0, 0.3); }
+        .btn-bordo:hover { background: #E66A00; box-shadow: 0 6px 20px rgba(255, 122, 0, 0.4); }
+        .btn-outline { background: transparent; color: var(--text-dark); border: 2px solid var(--glass-border); transition: border-color 0.3s, color 0.3s, background 0.3s; }
+        .btn-outline:hover { border-color: var(--secondary); color: var(--secondary); background: rgba(0, 200, 83, 0.05); }
+
+        input, select, textarea { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid var(--glass-border); border-radius: 8px; background: var(--input-bg); color: var(--text-dark); font-family: 'Poppins', sans-serif; box-sizing: border-box; transition: 0.3s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.1); }
+
+        .container { width: 90%; max-width: 1100px; margin: 40px auto; transition: 0.4s; position: relative; z-index: 1; }
+        .hidden { display: none !important; }
+        
+        .takvim { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; font-size: 13px; text-align: center; margin-top: 15px; }
+        .bugun { background: var(--secondary); color: white; border-radius: 6px; font-weight: bold; box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3); }
+        
+        .badge { padding: 4px 8px; font-size: 11px; color: white; border-radius: 6px; font-weight: 600; }
+        .yorum { background: rgba(0,0,0,0.03); padding: 12px; margin-top: 10px; font-size: 13px; border-left: 4px solid var(--secondary); border-radius: 0 8px 8px 0; transition: background 0.5s; }
+        body.dark-mode .yorum { background: rgba(255,255,255,0.03); }
+        
+        h2 { color: var(--primary); font-weight: 700; margin-top: 0; }
+
+        #bildirim-paneli { position: fixed; top: 20px; right: 20px; width: 300px; background: var(--panel-bg); color: var(--text-dark); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 20px; z-index: 2000; border-left: 5px solid var(--primary); transition: background 0.5s, color 0.5s; }
+        body.dark-mode #bildirim-paneli { border-left: 5px solid var(--secondary); }
+    </style>
+</head>
+<body>
+
+<div class="bg-pattern"></div>
+<div class="bg-shape shape1"></div>
+<div class="bg-shape shape2"></div>
+<div class="bg-shape shape3"></div>
+<div class="bg-shape shape4"></div>
+
+<div id="sidebar" class="sidebar">
+    <img id="side-avatar" src="https://ui-avatars.com/api/?name=ZBN&background=FF7A00&color=fff&rounded=true" style="width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 10px 20px rgba(255, 122, 0, 0.3); margin: 0 auto 15px; display: block;">
+    
+    <div style="text-align:center; margin-bottom:30px;">
+        <b id="side-name" style="font-size: 18px;">Yükleniyor...</b><br>
+        <small id="side-role" style="opacity: 0.7;"></small>
+    </div>
+    <button class="btn btn-outline" style="width:100%; margin-bottom:10px;" onclick="sayfaDegistir('liste-ekrani')">🏠 Ana Sayfa</button>
+    <button class="btn btn-outline" style="width:100%; margin-bottom:10px; position:relative;" onclick="bildirimleriAc()">🔔 Bildirimler <span id="bildirim-sayac" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; width:20px; height:20px; font-size:12px; display:flex; align-items:center; justify-content:center;">0</span></button>
+    <button class="btn btn-outline" style="width:100%; margin-bottom:10px;" onclick="sayfaDegistir('notlar-ekrani'); notlariGoster();">📚 Ders Notlarım</button>
+    <button class="btn btn-outline" style="width:100%; margin-bottom:10px;" onclick="sayfaDegistir('ayarlar-ekrani')">⚙️ Ayarlar</button>
+    <button class="btn btn-bordo" style="width:100%; margin-top:30px;" onclick="cikisYap()">Çıkış Yap</button>
+</div>
+
+<div id="bildirim-paneli" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h3 style="margin:0;">Bildirimler</h3>
+        <button onclick="document.getElementById('bildirim-paneli').classList.add('hidden')" style="border:none; background:none; color:var(--text-dark); cursor:pointer; font-size:16px;">✕</button>
+    </div>
+    <div id="bildirim-listesi" style="max-height: 300px; overflow-y: auto; font-size: 13px;">Henüz bildirim yok.</div>
+</div>
+
+<div class="container" id="main-cont">
+    <button class="btn btn-bordo hidden" id="menu-btn" onclick="toggleSidebar()" style="margin-bottom: 20px;">☰ Menü</button>
+
+    <div id="giris-ekrani" class="card" style="max-width:400px; margin:10vh auto; text-align:center; padding: 40px 30px;">
+        <div class="zbn-logo" style="margin-bottom: 20px;">ZBN</div>
+        <h2>Sisteme Giriş</h2>
+        <input type="email" id="emailInp" placeholder="E-posta Adresi">
+        <input type="password" id="sifreInp" placeholder="Şifre (En az 6 haneli)">
+        <div id="kayit-ek-alanlari" class="hidden">
+            <input type="text" id="isimInp" placeholder="Adınız Soyadınız">
+            <select id="rolSec"><option value="ogrenci">Öğrenci Hesabı</option><option value="ogretmen">Öğretmen Hesabı</option></select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn btn-bordo" id="btn-giris" style="flex: 1;" onclick="sistemeGiris()">Giriş Yap</button>
+            <button class="btn btn-outline" id="btn-kayit-ol" style="flex: 1;" onclick="kayitModunaGec()">Kayıt Ol</button>
+        </div>
+        <button class="btn btn-outline hidden" id="btn-gercek-kayit" style="width: 100%; margin-top: 10px;" onclick="sistemeKayitOl()">Hesabı Oluştur</button>
+        <small id="auth-hata" style="color: red; display: block; margin-top: 15px; font-weight: bold;"></small>
+    </div>
+
+    <div id="ana-panel" class="hidden">
+        <div id="liste-ekrani">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h2>Sınıflarım</h2>
+                <button class="btn btn-bordo hidden" id="addBtn" onclick="sinifEkle()">+ Sınıf Ekle</button>
+            </div>
+            <div id="sinif-liste" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:20px;"></div>
+        </div>
+
+        <div id="detay-ekrani" class="hidden">
+            <button class="btn btn-outline" onclick="sayfaDegistir('liste-ekrani')">← Sınıflara Dön</button>
+            
+            <div class="card" style="background: rgba(0, 200, 83, 0.05); border-color: var(--secondary); margin-top:20px;">
+                <h3 style="margin-top:0; color:var(--secondary); display:flex; align-items:center; gap:10px;">
+                    <span style="width:12px; height:12px; background:red; border-radius:50%; display:inline-block; animation: pulse 2s infinite;"></span> Canlı Ders
+                </h3>
+                <div id="canli-ders-alani"></div>
+            </div>
+
+            <div style="display:flex; gap:25px; margin-top:20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <div class="card"><h4 id="takvim-ay" style="margin-top:0; color: var(--primary);"></h4><div id="takvim-gunler" class="takvim"></div></div>
+                </div>
+                <div style="flex: 2; min-width: 300px;">
+                    <div class="card" style="background: linear-gradient(135deg, var(--primary), #FF9E44); color:white; border:none;">
+                        <h2 id="aktif-baslik" style="margin:0; color: white;"></h2><small id="aktif-kod" style="opacity: 0.9;"></small>
+                    </div>
+                    
+                    <div class="card" id="mesaj-alani" style="display: flex; gap: 10px;">
+                        <input type="text" id="mesajInp" placeholder="Ödev, duyuru veya link paylaşın..." style="margin-bottom: 0;">
+                        <button class="btn btn-bordo" onclick="paylas()">Paylaş</button>
+                    </div>
+                    
+                    <div id="akis"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notlar-ekrani" class="hidden">
+            <div class="card">
+                <h2>📚 Ders Notlarım</h2>
+                <textarea id="notInput" placeholder="Buraya hızlıca notlarınızı alabilirsiniz..."></textarea>
+                <button class="btn btn-bordo" onclick="notKaydet()">Notu Kaydet</button>
+                <div id="kayitli-notlar" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+        
+        <div id="ayarlar-ekrani" class="hidden">
+            <div class="card" style="max-width: 400px;">
+                <h2>⚙️ Ayarlar</h2>
+                
+                <p style="font-weight: 600; margin-bottom: 10px;">Tema Rengi:</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                    <button class="btn btn-bordo" onclick="temaDeğiş('#FF7A00')">Turuncu Tema</button>
+                    <button class="btn btn-outline" style="border-color: #800000; color: #800000;" onclick="temaDeğiş('#800000')">Bordo Tema</button>
+                </div>
+
+                <p style="font-weight: 600; margin-bottom: 10px;">Görünüm Modu:</p>
+                <button class="btn btn-outline" style="width: 100%; border-color: var(--text-dark); display: flex; align-items: center; justify-content: center; gap: 10px;" id="btn-karanlik" onclick="karanlikModuDegistir()">
+                    🌙 Karanlık Modu Aç
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDG7fp9Uzhw7ai2LwSEX-SQxsFCs8BXg1w",
+        authDomain: "classroom-by-zbn.firebaseapp.com",
+        projectId: "classroom-by-zbn",
+        storageBucket: "classroom-by-zbn.firebasestorage.app",
+        messagingSenderId: "515419653007",
+        appId: "1:515419653007:web:583a59c5ad5198318b41fa"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let user = { name: "", role: "", uid: "" };
+    let classes = []; let classesIds = []; let aktifIdx = null; let toplamPostSayisi = 0;
+
+    if(localStorage.getItem('zem_dark_mode') === 'true') { document.body.classList.add('dark-mode'); }
+    
+    window.karanlikModuDegistir = function() {
+        document.body.classList.toggle('dark-mode');
+        let isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('zem_dark_mode', isDark);
+        karanlikButonunuGuncelle();
+    }
+
+    function karanlikButonunuGuncelle() {
+        let btn = document.getElementById('btn-karanlik');
+        if(document.body.classList.contains('dark-mode')) { btn.innerHTML = "☀️ Aydınlık Modu Aç"; } 
+        else { btn.innerHTML = "🌙 Karanlık Modu Aç"; }
+    }
+    document.addEventListener("DOMContentLoaded", karanlikButonunuGuncelle);
+
+    window.getAvatar = function(isim) { return `https://ui-avatars.com/api/?name=${encodeURIComponent(isim)}&background=FF7A00&color=fff&rounded=true&bold=true`; }
+
+    window.kayitModunaGec = function() { document.getElementById('kayit-ek-alanlari').classList.remove('hidden'); document.getElementById('btn-giris').classList.add('hidden'); document.getElementById('btn-kayit-ol').classList.add('hidden'); document.getElementById('btn-gercek-kayit').classList.remove('hidden'); }
+    window.bildirimleriAc = function() { document.getElementById('bildirim-paneli').classList.toggle('hidden'); document.getElementById('bildirim-sayac').innerText = "0"; }
+
+    window.sistemeKayitOl = async function() {
+        try {
+            document.getElementById('auth-hata').innerText = "Kayıt yapılıyor...";
+            const res = await createUserWithEmailAndPassword(auth, document.getElementById('emailInp').value, document.getElementById('sifreInp').value);
+            await setDoc(doc(db, "users", res.user.uid), { name: document.getElementById('isimInp').value, role: document.getElementById('rolSec').value });
+        } catch (e) { document.getElementById('auth-hata').innerText = e.message; }
+    }
+    window.sistemeGiris = async function() {
+        try { document.getElementById('auth-hata').innerText = "Giriş yapılıyor..."; await signInWithEmailAndPassword(auth, document.getElementById('emailInp').value, document.getElementById('sifreInp').value); } 
+        catch (e) { document.getElementById('auth-hata').innerText = "E-posta veya şifre hatalı!"; }
+    }
+    window.cikisYap = function() { signOut(auth); }
+
+    onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+            const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+            if (userDoc.exists()) {
+                user = { ...userDoc.data(), uid: firebaseUser.uid };
+                document.getElementById('giris-ekrani').classList.add('hidden'); document.getElementById('ana-panel').classList.remove('hidden'); document.getElementById('menu-btn').classList.remove('hidden');
+                
+                document.getElementById('side-name').innerText = user.name; 
+                document.getElementById('side-role').innerText = user.role === 'ogretmen' ? 'Öğretmen Hesabı' : 'Öğrenci Hesabı';
+                document.getElementById('side-avatar').src = window.getAvatar(user.name);
+                
+                if(user.role === 'ogretmen') { document.getElementById('addBtn').classList.remove('hidden'); document.getElementById('mesaj-alani').classList.remove('hidden'); } 
+                else { document.getElementById('addBtn').classList.add('hidden'); document.getElementById('mesaj-alani').classList.add('hidden'); }
+                
+                karanlikButonunuGuncelle();
+                window.renderClasses();
+            }
+        } else {
+            document.getElementById('giris-ekrani').classList.remove('hidden'); document.getElementById('ana-panel').classList.add('hidden'); document.getElementById('sidebar').classList.remove('active'); document.getElementById('menu-btn').classList.add('hidden');
+        }
+    });
+
+    onSnapshot(collection(db, "classes"), (snapshot) => {
+        classes = []; classesIds = []; let yeniPostSayisi = 0; let bildirimHTML = "";
+        
+        snapshot.forEach((doc) => { 
+            let data = doc.data(); classes.push(data); classesIds.push(doc.id); 
+            yeniPostSayisi += data.posts ? data.posts.length : 0;
+            if(data.posts && data.posts.length > 0) {
+                let sonPostlar = data.posts.slice(-3).reverse();
+                sonPostlar.forEach(p => { bildirimHTML += `<div style="padding:10px; border-bottom:1px solid rgba(128,128,128,0.2);"><b>${data.name}</b> sınıfında yeni içerik: <i>"${p.t.substring(0, 20)}..."</i></div>`; });
+            }
+        });
+
+        if(toplamPostSayisi !== 0 && yeniPostSayisi > toplamPostSayisi) document.getElementById('bildirim-sayac').innerText = parseInt(document.getElementById('bildirim-sayac').innerText) + (yeniPostSayisi - toplamPostSayisi);
+        toplamPostSayisi = yeniPostSayisi; document.getElementById('bildirim-listesi').innerHTML = bildirimHTML || "Yeni bildirim yok.";
+
+        if(!document.getElementById('ana-panel').classList.contains('hidden')) { window.renderClasses(); if(aktifIdx !== null && classes[aktifIdx]) { window.renderPosts(); window.renderCanliDers(); } else window.sayfaDegistir('liste-ekrani'); }
+    });
+
+    window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('active'); }
+    window.sayfaDegistir = function(id) { ['liste-ekrani', 'detay-ekrani', 'notlar-ekrani', 'ayarlar-ekrani'].forEach(e => document.getElementById(e).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(window.innerWidth < 768 && document.getElementById('sidebar').classList.contains('active')) window.toggleSidebar(); }
+
+    window.sinifEkle = async function() { let n = prompt("Sınıf Adı:"); if(n) await addDoc(collection(db, "classes"), { name: n, code: Math.random().toString(36).substring(7).toUpperCase(), posts: [] }); }
+    window.sinifSil = async function(i, e) { e.stopPropagation(); if(confirm("Bu sınıfı silmek istediğinize emin misiniz?")) await deleteDoc(doc(db, "classes", classesIds[i])); }
+    window.renderClasses = function() {
+        const div = document.getElementById('sinif-liste'); div.innerHTML = "";
+        classes.forEach((c, i) => {
+            div.innerHTML += `
+                <div class="card" style="cursor:pointer; position:relative;" onclick="openClass(${i})">
+                    ${user.role === 'ogretmen' ? `<button onclick="sinifSil(${i}, event)" style="position:absolute; right:15px; top:15px; border:none; background:rgba(255,0,0,0.1); color:red; border-radius:50%; width:25px; height:25px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>` : ''}
+                    <h3 style="margin-top:5px; color:var(--primary);">${c.name}</h3>
+                    <small style="background:rgba(128,128,128,0.1); padding:4px 8px; border-radius:4px; opacity:0.8;">Kod: <b>${c.code}</b></small>
+                </div>`;
+        });
+    }
+
+    window.openClass = function(i) { aktifIdx = i; window.sayfaDegistir('detay-ekrani'); document.getElementById('aktif-baslik').innerText = classes[i].name; document.getElementById('aktif-kod').innerText = "Sınıf Kodu: " + classes[i].code; window.takvim(); window.renderPosts(); window.renderCanliDers(); }
+
+    window.renderCanliDers = function() {
+        let div = document.getElementById('canli-ders-alani'); let c = classes[aktifIdx];
+        if(user.role === 'ogretmen') {
+            div.innerHTML = `<input type="text" id="liveLinkInp" placeholder="Zoom veya Google Meet linkini yapıştırın..." value="${c.liveLink || ''}" style="margin-bottom: 10px;">
+                ${c.liveLink ? `<button class="btn btn-outline" style="color:red; border-color:red;" onclick="dersBitir()">Dersi Bitir</button> <a href="${c.liveLink}" target="_blank" class="btn btn-bordo">Derse Git</a>` : `<button class="btn btn-bordo" onclick="dersBaslat()">Öğrenciler İçin Dersi Başlat</button>`}`;
+        } else {
+            if(c.liveLink) div.innerHTML = `<a href="${c.liveLink}" target="_blank" class="btn btn-bordo" style="background:var(--secondary); width:100%; text-align:center; display:block; text-decoration:none; padding:15px 0; font-size:16px;">🔴 Canlı Derse Katıl</a>`;
+            else div.innerHTML = `<p style="opacity:0.7; margin:0;">Şu an bu sınıfta aktif bir canlı ders bulunmuyor.</p>`;
+        }
+    }
+    window.dersBaslat = async function() { let link = document.getElementById('liveLinkInp').value; if(!link) return alert("Zoom/Meet linki eksik!"); await updateDoc(doc(db, "classes", classesIds[aktifIdx]), { liveLink: link }); }
+    window.dersBitir = async function() { await updateDoc(doc(db, "classes", classesIds[aktifIdx]), { liveLink: null }); }
+
+    window.paylas = async function() { let txt = document.getElementById('mesajInp').value; if(!txt) return; let currentPosts = [...classes[aktifIdx].posts]; currentPosts.push({ u: user.name, t: txt, teslim: false, puan: null, yorumlar: [] }); await updateDoc(doc(db, "classes", classesIds[aktifIdx]), { posts: currentPosts }); document.getElementById('mesajInp').value = ""; }
+
+    window.renderPosts = function() {
+        if(aktifIdx === null || !classes[aktifIdx]) return;
+        const div = document.getElementById('akis'); div.innerHTML = "";
+        const posts = classes[aktifIdx].posts || [];
+        
+        posts.slice().reverse().forEach((p, revI) => {
+            let i = (posts.length - 1) - revI;
+            
+            let yorumlar = (p.yorumlar || []).map(y => `
+                <div class="yorum" style="display:flex; align-items:center; gap:10px;">
+                    <img src="${window.getAvatar(y.u)}" style="width:24px; height:24px; border-radius:50%;">
+                    <div><b style="color:var(--text-dark); opacity:0.9;">${y.u}:</b> <span style="opacity:0.8;">${y.t}</span></div>
+                </div>`).join('');
+            
+            div.innerHTML += `
+                <div class="card" style="padding: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="${window.getAvatar(p.u)}" style="width:40px; height:40px; border-radius:50%; box-shadow:0 3px 6px rgba(0,0,0,0.2);">
+                            <b style="color:var(--primary); font-size:16px;">${p.u}</b> 
+                        </div>
+
+                        ${p.teslim ? '<span class="badge" style="background:var(--secondary)">✓ Teslim Edildi</span>' : '<span class="badge" style="background:#FF3B30">⌛ Bekliyor</span>'}
+                    </div>
+                    <p style="line-height:1.6; opacity:0.9; font-size:15px;">${p.t}</p>
+                    <div style="display:flex; gap:8px; margin-top:15px; align-items:center;">
+                        <button class="btn btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="yorumYap(${i})">💬 Yanıtla</button>
+                        ${user.role === 'ogrenci' && !p.teslim ? `<button class="btn btn-bordo" style="padding: 6px 12px; font-size:12px;" onclick="teslim(${i})">📤 Teslim Et</button>` : ''}
+                        ${user.role === 'ogretmen' ? `<button class="btn btn-outline" style="padding: 6px 12px; font-size:12px; border-color:var(--primary); color:var(--primary);" onclick="puanVer(${i})">⭐ Puan Ver</button>` : ''}
+                        ${p.puan ? `<b style="margin-left:auto; color:#FFB300; background:rgba(255,179,0,0.1); padding:5px 10px; border-radius:6px;">Not: ${p.puan}</b>` : ''}
+                    </div>
+                    <div style="margin-top: 15px;">${yorumlar}</div>
+                </div>`;
+        });
+    }
+
+    window.teslim = async function(i) { let currentPosts = [...classes[aktifIdx].posts]; currentPosts[i].teslim = true; await updateDoc(doc(db, "classes", classesIds[aktifIdx]), { posts: currentPosts }); }
+    window.puanVer = async function(i) { let p = prompt("Öğrenciye vereceğiniz puan:"); if(p) { let currentPosts = [...classes[aktifIdx].posts]; currentPosts[i].puan = p; await updateDoc(doc(db, "classes", classesIds[aktifIdx]), { posts: currentPosts }); } }
+    window.yorumYap = async function(i) { let y = prompt("Yorumunuzu yazın:"); if(y) { let currentPosts = [...classes[aktifIdx].posts]; currentPosts[i].yorumlar.push({u:user.name, t:y}); await updateDoc(doc(db, "classes", classesIds[aktifIdx]), { posts: currentPosts }); } }
+    
+    window.notKaydet = function() { let n = document.getElementById('notInput').value; if(!n) return; let notlar = JSON.parse(localStorage.getItem('zem_notlar')) || []; notlar.push(n); localStorage.setItem('zem_notlar', JSON.stringify(notlar)); document.getElementById('notInput').value = ""; window.notlariGoster(); }
+    window.notlariGoster = function() { let notlar = JSON.parse(localStorage.getItem('zem_notlar')) || []; document.getElementById('kayitli-notlar').innerHTML = notlar.map(n => `<div class="yorum" style="border-left-color:var(--primary);">${n}</div>`).join(''); }
+    window.temaDeğiş = function(c) { document.documentElement.style.setProperty('--primary', c); }
+    window.takvim = function() { const d = new Date(); document.getElementById('takvim-ay').innerText = d.toLocaleString('tr', {month:'long'}) + " " + d.getFullYear(); let g = ""; for(let i=1; i<=30; i++) g += `<div class="${i===d.getDate()?'bugun':''}">${i}</div>`; document.getElementById('takvim-gunler').innerHTML = g; }
+</script>
+</body>
+</html>
